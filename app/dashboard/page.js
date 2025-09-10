@@ -1,12 +1,15 @@
 // /app/dahsboard/page.js
 import GetMoment from "@/components/dashboardUI/getMoment";
+import Sidebar from "@/components/dashboardUI/SideBar/sideBar";
 
 export default function Dashboard() {
-    
-    return (
-      <>
-        <h1>Halaman Ini Khusus untuk Menampilkan Data dari Momnets</h1>
+  return (
+    <div className="flex w-full min-h-screen bg-gray-100">
+        <Sidebar />
+      <main className="flex-1 p-4 lg:p-6 pt-14 lg:pt-6">
         <GetMoment />
-      </>
-    );
+      </main>
+    </div>
+  );
 }
+
