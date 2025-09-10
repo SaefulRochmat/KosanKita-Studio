@@ -79,3 +79,44 @@ export async function GET() {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+// DELETE: Hapus moment
+export async function DELETE(req) {
+  try {
+    const { id, video_public_id } = await req.json();
+
+    const { error } = await supabase.from("moments").delete().eq("id", id);
+    if (error) throw error;
+
+    // hapus video dari Cloudinary jika ada
+    if (video_public_id) {
+      await cloudinary.uploader.destroy(video_public_id);
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Error delete moment:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+// PUT: Update moment (title & description)
+export async function PUT(req) {
+  try {
+    const { id, title, description } = await req.json();
+
+    const { data, error } = await supabase
+      .from("moments")
+      .update({ title, description })
+      .eq("id", id)
+      .select();
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, data });
+  } catch (err) {
+    console.error("Error update moment:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+

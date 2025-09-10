@@ -18,14 +18,14 @@ export default function SideBar() {
   const menuItems = [
     { name: "Dashboard", icon: <FiHome />, path: "/dashboard" },
     { name: "Upload File", icon: <FiUpload />, path: "/dashboard/upload-form" },
-    { name: "Uploaded File", icon: <FiFolder />, path: "/dashboard/uploaded" },
+    { name: "Uploaded File", icon: <FiFolder />, path: "/dashboard/uploaded-form" },
   ];
 
   return (
     <div className="flex">
       {/* ============== NAVBAR (Tablet & Mobile) ============== */}
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-gray-900 text-white flex items-center justify-between px-4 py-3 z-50 shadow-md">
-        <div className="text-lg font-bold">My Dashboard</div>
+        <div className="text-lg font-bold">Kosan Studio</div>
         <button
           onClick={toggleSidebar}
           className="p-2 text-2xl bg-gray-800 rounded-md"
@@ -82,7 +82,7 @@ export default function SideBar() {
       {/* ============== SIDEBAR (Desktop & Laptop) ============== */}
       <aside className="hidden lg:flex lg:flex-col lg:w-64 bg-gray-900 text-white h-full">
         <div className="flex items-center justify-center py-6 text-2xl font-bold border-b border-green-700">
-          My Dashboard
+          Kosan Studio
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2">
           {menuItems.map((item, index) => (
