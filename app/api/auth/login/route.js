@@ -1,10 +1,10 @@
 // /app/api/auth/login/route.js
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
-import path from "path";
+import { SignJWT } from "jose";
+
+const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -34,25 +34,27 @@ export async function POST(req) {
         return NextResponse.json({ error: "Invalid password" }, { status: 400 });
     }
 
-    //generate token
-    const token = crypto.randomUUID();
+    //generate JWT pakai jose
+    const token = await new SignJWT({ id: user.id, username: user.username })
+      .setProtectedHeader({ alg: "HS256" })
+      .setExpirationTime("1h")
+      .sign(secret);
 
-    //simpan ke tabel sessions
-    await supabase
-        .from("sessions")
-        .insert([{ token, user_id: user.id, expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) }]);
-
-    //set cookie HttpOnly
-    const cookieStore = await cookies();
-        cookieStore.set("session", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 60 * 60 * 24, // 1 hari
-        path: "/",
+    const res = NextResponse.json({
+      success: true,
+      user: { id: user.id, username: user.username },
     });
 
-    return NextResponse.json({ success: true, user: { id: user.id, username: user.username } });
+    //set cookie HttpOnly
+    res.cookies.set("session", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60, // 1 jam
+      path: "/",
+    });
+
+    return res;
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

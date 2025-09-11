@@ -1,8 +1,9 @@
-// app/(auth)/login/page.js
+// app/login/page.js
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ username: "", password: "" });
@@ -60,6 +61,11 @@ export default function LoginPage() {
           className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
         >
           {loading ? "Logging in..." : "Login"}
+        </button>
+        <button className="w-full bg-blue-500 text-white mt-2 py-2 rounded hover:bg-blue-600">
+          <Link href="/register">
+            Register
+          </Link>
         </button>
 
         {message && (

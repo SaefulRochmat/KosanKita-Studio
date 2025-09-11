@@ -1,33 +1,37 @@
-// /middleware.js
+// middleware.js
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { jwtVerify } from "jose";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function middleware(req) {
+  const url = req.nextUrl.clone();
+
+  //ambil cookie session
   const token = req.cookies.get("session")?.value;
 
-  if (!token) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
+  //proteksi halaman dashboard
+  if (url.pathname.startsWith("/dashboard")) {
+    if(!token) {
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
 
-  // Validasi session di tabel sessions
-  const { data: session } = await supabase
-    .from("sessions")
-    .select("*")
-    .eq("token", token)
-    .single();
-
-  if (!session) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    try {
+      // Verify JWT
+      await jwtVerify(token, secret);
+    } catch (err) {
+      console.error("JWT error:", err.message);
+      url.pathname = "/login";
+      const res = NextResponse.redirect(url);
+      res.cookies.delete("session");
+      return res;
+    }
   }
 
   return NextResponse.next();
 }
-
+//kasih tau route mana aja yang kena middleware
 export const config = {
-  matcher: ["/dashboard/:path*"], // semua halaman dashboard wajib login
+  matcher: ["/dashboard/:path*"],
 };
