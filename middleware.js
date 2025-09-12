@@ -1,37 +1,43 @@
-// middleware.js
+// /middleware.js
 import { NextResponse } from "next/server";
-import { jwtVerify } from "jose";
-
-const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(req) {
-  const url = req.nextUrl.clone();
+  const res = NextResponse.next();
 
-  //ambil cookie session
-  const token = req.cookies.get("session")?.value;
-
-  //proteksi halaman dashboard
-  if (url.pathname.startsWith("/dashboard")) {
-    if(!token) {
-      url.pathname = "/login";
-      return NextResponse.redirect(url);
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        get(name) {
+          return req.cookies.get(name)?.value;
+        },
+        set(name, value, options) {
+          res.cookies.set({ name, value, ...options });
+        },
+        remove(name, options) {
+          res.cookies.set({ name, value: "", ...options });
+        },
+      },
     }
+  );
 
-    try {
-      // Verify JWT
-      await jwtVerify(token, secret);
-    } catch (err) {
-      console.error("JWT error:", err.message);
-      url.pathname = "/login";
-      const res = NextResponse.redirect(url);
-      res.cookies.delete("session");
-      return res;
-    }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  console.log("middleware jalan, user:", user?.email); // debug
+
+  if (!user && req.nextUrl.pathname.startsWith("/dashboard")) {
+    const redirectUrl = req.nextUrl.clone();
+    redirectUrl.pathname = "/login";
+    return NextResponse.redirect(redirectUrl);
   }
 
-  return NextResponse.next();
+  return res;
 }
-//kasih tau route mana aja yang kena middleware
+
 export const config = {
   matcher: ["/dashboard/:path*"],
 };

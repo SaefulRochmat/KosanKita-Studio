@@ -1,3 +1,4 @@
+// /app/components/dashboardUI/uploadedMoment.js
 "use client";
 
 import useGetMoments from "@/hooks/useGetMoments";

@@ -1,4 +1,4 @@
-// components/dashboardUI/Side Bar/sideBar.js
+// app/components/dashboardUI/SideBar/sideBar.js
 "use client";
 
 import Link from "next/link";
@@ -11,9 +11,22 @@ import {
   FiFolder,
 } from "react-icons/fi";
 import useSideBar from "@/hooks/useSideBar";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 export default function SideBar() {
   const { isOpen, toggleSidebar } = useSideBar();
+  const supabase = createClient();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Logout error:", error.message);
+      return;
+    }
+    router.push("/login"); // redirect ke login setelah logout
+  };
 
   const menuItems = [
     { name: "Dashboard", icon: <FiHome />, path: "/dashboard" },
@@ -72,7 +85,10 @@ export default function SideBar() {
             <FiUser className="text-xl" />
             <span>User</span>
           </Link>
-          <button className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-red-600 transition">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-red-600 transition"
+          >
             <FiLogOut className="text-xl" />
             <span>Logout</span>
           </button>
@@ -104,7 +120,10 @@ export default function SideBar() {
             <FiUser className="text-xl" />
             <span>User</span>
           </Link>
-          <button className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-red-600 transition">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-red-600 transition"
+          >
             <FiLogOut className="text-xl" />
             <span>Logout</span>
           </button>
@@ -113,5 +132,3 @@ export default function SideBar() {
     </div>
   );
 }
-
-

@@ -1,4 +1,4 @@
-// components/dashboardUI/formUpload.js
+// app/components/dashboardUI/formUpload.js
 
 'use client'
 import useUploadMoments from "@/hooks/useUploadMoments";
